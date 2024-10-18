@@ -1,18 +1,22 @@
-import React from 'react';
-import { View, Text, Button, Alert } from 'react-native';
+// FeedingScreen.js
+import React, { useState } from 'react';
+import { View, Text, Button } from 'react-native';
 
-const FeedingMiniGame = ({ onFeed }) => {
-    const handleFeed = () => {
-        onFeed();
-        Alert.alert('Yummy!', 'Your Tamagotchi has been fed!');
+const FeedingScreen = ({ route, navigation }) => {
+    const { hungerLevel, setHungerLevel } = route.params; // Get parameters from the route
+
+    const feedTamagochi = () => {
+        // Logic to feed Tamagotchi and update hunger level
+        setHungerLevel(hungerLevel + 10); // Increase hunger level
+        navigation.goBack(); // Go back to MainScreen after feeding
     };
 
     return (
         <View>
-            <Text>Feeding Mini Game</Text>
-            <Button title="Feed Tamagotchi" onPress={handleFeed} />
+            <Text>Feed the Tamagotchi!</Text>
+            <Button title="Feed" onPress={feedTamagochi} />
         </View>
     );
 };
 
-export default FeedingMiniGame;
+export default FeedingScreen;
