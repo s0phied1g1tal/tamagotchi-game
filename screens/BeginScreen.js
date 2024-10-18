@@ -7,7 +7,7 @@ const BeginScreen = ({ navigation }) => {
       <Text>Welcome to the Tamagotchi Game!</Text>
       <Button
         title="Start"
-        onPress={() => navigation.navigate('Login')}
+        onPress={() => navigation.navigate('LoginScreen')}
       />
     </View>
   );

@@ -26,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
         const data = await response.json();
         console.log(data);
         Alert.alert('Success', isLogin ? 'Logged in successfully!' : 'Account created successfully!');
-        navigation.navigate('Main'); // Navigate to the main screen
+        navigation.navigate('MainScreen'); // Navigate to the main screen
     } catch (error) {
         console.error(error);
         Alert.alert('Error', error.message); // Show error alert
