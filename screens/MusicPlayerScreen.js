@@ -1,7 +1,7 @@
 import { Audio } from 'expo-av';
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button } from 'react-native';
-import Slider from '@react-native-community/slider'; // Updated import
+import { View, Text, Button, StyleSheet } from 'react-native';
+import Slider from '@react-native-community/slider'; // Importing Slider from the community package
 
 const MusicPlayerScreen = ({ route }) => {
     const [sound, setSound] = useState(null); // Manage sound instance
@@ -11,24 +11,35 @@ const MusicPlayerScreen = ({ route }) => {
     const { setFun } = route.params; // Destructure setFun from route.params
 
     const playSound = async () => {
-        const { sound, status } = await Audio.Sound.createAsync(
-            require('../assets/audio/ETA.mp3'), // Correct path to your audio file
-            {
-                isLooping: false,
-                shouldPlay: true,
-            }
-        );
+        try {
+            const { sound, status } = await Audio.Sound.createAsync(
+                require('../assets/audio/ETA.mp3'), // Correct path to your audio file
+                {
+                    isLooping: false,
+                    shouldPlay: true,
+                }
+            );
 
-        setSound(sound);
-        setDuration(status.durationMillis);
-        sound.setOnPlaybackStatusUpdate(updateStatus);
-        setIsPlaying(true);
-        setFun(prev => Math.min(prev + 5, 100)); // Increase fun level when music plays
+            setSound(sound);
+            setDuration(status.durationMillis);
+            sound.setOnPlaybackStatusUpdate(updateStatus);
+            setIsPlaying(true);
+            setFun(prev => Math.min(prev + 5, 100)); // Increase fun level when music plays
+        } catch (error) {
+            console.error("Error playing sound:", error);
+        }
     };
 
     const updateStatus = (status) => {
-        if (status.isLoaded && status.isPlaying) {
-            setProgress(status.positionMillis); // Update progress as song plays
+        if (status.isLoaded) {
+            // Update the progress if the sound is playing
+            if (status.isPlaying) {
+                setProgress(status.positionMillis); // Update progress as the song plays
+            }
+            // Ensure the duration is set when the audio is loaded
+            if (duration === 0) {
+                setDuration(status.durationMillis);
+            }
         }
     };
 
@@ -36,6 +47,20 @@ const MusicPlayerScreen = ({ route }) => {
         await sound.pauseAsync();
         setIsPlaying(false);
     };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (isPlaying && sound) {
+                sound.getStatusAsync().then(status => {
+                    if (status.isPlaying) {
+                        setProgress(status.positionMillis);
+                    }
+                });
+            }
+        }, 1000); // Update progress every second
+    
+        return () => clearInterval(interval); // Cleanup on unmount
+    }, [isPlaying, sound]);
 
     const stopSound = async () => {
         await sound.stopAsync();
@@ -51,8 +76,8 @@ const MusicPlayerScreen = ({ route }) => {
     }, [sound]);
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Music Player</Text>
+        <View style={styles.container}>
+            <Text style={styles.title}>Music Player</Text>
 
             {/* Play/Pause Button */}
             <Button title={isPlaying ? "Pause" : "Play"} onPress={isPlaying ? pauseSound : playSound} />
@@ -62,11 +87,15 @@ const MusicPlayerScreen = ({ route }) => {
 
             {/* Slider for tracking song progress */}
             <Slider
+                style={styles.slider}
                 value={progress}
                 minimumValue={0}
                 maximumValue={duration}
                 onSlidingComplete={async (value) => {
-                    await sound.setPositionAsync(value);
+                    if (sound) {
+                        await sound.setPositionAsync(value);
+                        setProgress(value); // Update local progress
+                    }
                 }}
                 disabled={!isPlaying}
             />
@@ -76,5 +105,21 @@ const MusicPlayerScreen = ({ route }) => {
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 24,
+        marginBottom: 20,
+    },
+    slider: {
+        width: '80%',
+        height: 40,
+    },
+});
 
 export default MusicPlayerScreen;

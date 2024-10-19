@@ -16,8 +16,13 @@ const MainScreen = ({ navigation }) => {
     }, []);
 
     const navigateToMusicPlayerScreen = () => {
-        navigation.navigate('MusicPlayerScreen', { setFun }); // Pass setFun here
+        navigation.navigate('MusicPlayerScreen', { setFun }); // Pass setFun
     };
+
+    const navigateToFeedingScreen = () => {
+        navigation.navigate('FeedingScreen', { hunger, setHunger });
+    };
+    
 
     return (
         <View>
@@ -27,9 +32,9 @@ const MainScreen = ({ navigation }) => {
             <ProgressBarAndroid styleAttr="Horizontal" indeterminate={false} progress={fun / 100} />
             
             <Button title="Go to Music Player" onPress={navigateToMusicPlayerScreen} />
+            <Button title="Go to Feeding Screen" onPress={navigateToFeedingScreen} />
         </View>
     );
 };
 
 export default MainScreen;
-
