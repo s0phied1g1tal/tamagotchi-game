@@ -65,7 +65,7 @@ const SnakeGame = ({ navigation }) => {
                 top: foodPosition.y,
                 width: snakeSize,
                 height: snakeSize,
-                backgroundColor: 'red' // Food color
+                backgroundColor: 'white' // Food color
             }} />
             <View style={styles.buttonContainer}>
                 <Button title="↑" onPress={moveUp} />
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: '#FF1879',
     },
     score: {
         fontSize: 24,
