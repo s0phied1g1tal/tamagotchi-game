@@ -1,63 +1,59 @@
 import { Audio } from 'expo-av';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import Slider from '@react-native-community/slider'; // Importing Slider from the community package
+import Slider from '@react-native-community/slider';
 
 const MusicPlayerScreen = ({ route }) => {
-    const [sound, setSound] = useState(null); // Manage sound instance
-    const [isPlaying, setIsPlaying] = useState(false); // Manage play/pause state
-    const [progress, setProgress] = useState(0); // Track current position in the song
-    const [duration, setDuration] = useState(0); // Track the duration of the song
-    const [currentSong, setCurrentSong] = useState(null); // Track the currently playing song
-    const { setFun } = route.params; // Destructure setFun from route.params
+    const [sound, setSound] = useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [currentSong, setCurrentSong] = useState(null);
+    const { setFun } = route.params;
 
-    // Define an array of songs
     const songs = [
-        { title: 'ETA', path: require('../assets/audio/ETA.mp3') },
-        { title: 'BuriBuri', path: require('../assets/audio/BuriBuri.mp3') },
-        { title: 'Clint Eastwood', path: require('../assets/audio/Clint Eastwood.mp3') },
-        { title: 'Espresso', path: require('../assets/audio/Espresso.mp3') },
-        { title: 'TTYL', path: require('../assets/audio/TTYL.mp3') },
+        { title: 'ETA', path: require('../assets/audio/ETA.mp3'), cover: require('../assets/images/cover1.jpg') },
+        { title: 'Song 2', path: require('../assets/audio/BuriBuri.mp3'), cover: require('../assets/images/cover2.jpg') },
+        { title: 'Song 3', path: require('../assets/audio/Clint Eastwood.mp3'), cover: require('../assets/images/cover3.jpg') },
+        { title: 'Song 4', path: require('../assets/audio/Espresso.mp3'), cover: require('../assets/images/cover4.jpg') },
+        { title: 'Song 5', path: require('../assets/audio/TTYL.mp3'), cover: require('../assets/images/cover5.jpg') },
     ];
 
+    const [currentSongIndex, setCurrentSongIndex] = useState(0);
+
     const playSound = async (song) => {
-        // Stop current sound if it's loaded and playing
         if (sound) {
-            const status = await sound.getStatusAsync();
-            if (status.isLoaded) {
-                await sound.stopAsync();
-                await sound.unloadAsync(); // Ensure the sound is unloaded
-            }
+            await sound.stopAsync();
+            setSound(null);
+            setIsPlaying(false);
+            setProgress(0);
         }
-    
+
         try {
-            const { sound: newSound, status } = await Audio.Sound.createAsync(
-                song.path, // Use the provided song path
+            const { sound, status } = await Audio.Sound.createAsync(
+                song.path,
                 {
                     isLooping: false,
                     shouldPlay: true,
                 }
             );
-    
-            setSound(newSound);
-            setCurrentSong(song.title); // Set the currently playing song title
+
+            setSound(sound);
+            setCurrentSong(song);
             setDuration(status.durationMillis);
-            newSound.setOnPlaybackStatusUpdate(updateStatus);
+            sound.setOnPlaybackStatusUpdate(updateStatus);
             setIsPlaying(true);
-            setFun(prev => Math.min(prev + 5, 100)); // Increase fun level when music plays
+            setFun(prev => Math.min(prev + 5, 100));
         } catch (error) {
             console.error("Error playing sound:", error);
         }
     };
-    
 
     const updateStatus = (status) => {
         if (status.isLoaded) {
-            // Update the progress if the sound is playing
             if (status.isPlaying) {
-                setProgress(status.positionMillis); // Update progress as the song plays
+                setProgress(status.positionMillis);
             }
-            // Ensure the duration is set when the audio is loaded
             if (duration === 0) {
                 setDuration(status.durationMillis);
             }
@@ -69,6 +65,18 @@ const MusicPlayerScreen = ({ route }) => {
         setIsPlaying(false);
     };
 
+    const nextSong = () => {
+        const nextIndex = (currentSongIndex + 1) % songs.length;
+        setCurrentSongIndex(nextIndex);
+        playSound(songs[nextIndex]);
+    };
+
+    const previousSong = () => {
+        const previousIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+        setCurrentSongIndex(previousIndex);
+        playSound(songs[previousIndex]);
+    };
+
     useEffect(() => {
         const interval = setInterval(() => {
             if (isPlaying && sound) {
@@ -78,9 +86,9 @@ const MusicPlayerScreen = ({ route }) => {
                     }
                 });
             }
-        }, 1000); // Update progress every second
+        }, 1000);
 
-        return () => clearInterval(interval); // Cleanup on unmount
+        return () => clearInterval(interval);
     }, [isPlaying, sound]);
 
     useEffect(() => {
@@ -91,17 +99,14 @@ const MusicPlayerScreen = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            {/* GIF at the top */}
             <Image
-                source={require('../assets/kirby.gif')} // Replace with your GIF path
+                source={require('../assets/kirby.gif')}
                 style={styles.gif}
-                resizeMode="contain" // Ensure the GIF scales properly
+                resizeMode="contain"
             />
 
-            {/* Title of the song */}
-            <Text style={styles.title}>Now Playing: {currentSong || 'Select a song'}</Text>
+            <Text style={styles.title}>Now Playing: {currentSong ? currentSong.title : 'Select a song'}</Text>
 
-            {/* Slider for tracking song progress */}
             <Slider
                 style={styles.slider}
                 value={progress}
@@ -110,36 +115,34 @@ const MusicPlayerScreen = ({ route }) => {
                 onSlidingComplete={async (value) => {
                     if (sound) {
                         await sound.setPositionAsync(value);
-                        setProgress(value); // Update local progress
+                        setProgress(value);
                     }
                 }}
                 disabled={!isPlaying}
             />
 
-            {/* Display duration */}
-            <Text style={styles.duration}>
-                {`Progress: ${(progress / 1000).toFixed(0)}s / ${(duration / 1000).toFixed(0)}s`}
-            </Text>
+            <View style={styles.progressContainer}>
+                <Text style={styles.progressText}>{`${Math.floor(progress / 1000)}s`}</Text>
+                <Text style={styles.progressText}>{`${Math.floor(duration / 1000)}s`}</Text>
+            </View>
 
-            {/* Control Buttons */}
             <View style={styles.controls}>
-                <TouchableOpacity onPress={() => { /* Rewind logic */ }}>
-                    <Text style={styles.controlButton}>{'|<'}</Text>
+                <TouchableOpacity onPress={previousSong}>
+                    <Image source={require('../assets/images/previous.png')} style={styles.controlImage} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={isPlaying ? pauseSound : () => {}}>
-                    <Text style={styles.controlButton}>{isPlaying ? '||' : '>'}</Text>
+                <TouchableOpacity onPress={isPlaying ? pauseSound : () => playSound(currentSong)}>
+                    <Image source={require('../assets/images/play.png')} style={styles.controlImage} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => { /* Forward logic */ }}>
-                    <Text style={styles.controlButton}>{'>|'}</Text>
+                <TouchableOpacity onPress={nextSong}>
+                    <Image source={require('../assets/images/next.png')} style={styles.controlImage} />
                 </TouchableOpacity>
             </View>
 
-            {/* Library Section */}
             <Text style={styles.libraryTitle}>Library</Text>
             <ScrollView horizontal contentContainerStyle={styles.library}>
                 {songs.map((song, index) => (
                     <TouchableOpacity key={index} style={styles.songCard} onPress={() => playSound(song)}>
-                        <Text style={styles.songText}>{song.title}</Text>
+                        <Image source={song.cover} style={styles.songImage} />
                     </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -151,41 +154,46 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        backgroundColor: '#FF1879', // Main background color
-        paddingVertical: 20, // Add some vertical padding
+        backgroundColor: '#FF1879',
+        paddingVertical: 20,
     },
     gif: {
         width: '100%',
-        height: 300,
+        height: 200,
         marginBottom: 10,
     },
     title: {
         fontSize: 24,
-        marginVertical: 5,
-        color: '#FFFFFF', // Adjust for visibility
+        marginVertical: 10,
+        color: '#FFFFFF',
     },
     slider: {
         width: '80%',
         height: 40,
     },
-    duration: {
-        color: '#FFFFFF', // Adjust for visibility
+    progressContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '80%',
         marginVertical: 10,
+    },
+    progressText: {
+        color: '#FFFFFF',
     },
     controls: {
         flexDirection: 'row',
         justifyContent: 'center',
         marginVertical: 10,
     },
-    controlButton: {
-        fontSize: 24,
-        color: '#FFFFFF', // Adjust for visibility
-        paddingHorizontal: 20,
+    controlImage: {
+        width: 40, // Adjust size as needed
+        height: 40,
+        marginHorizontal: 10,
     },
     libraryTitle: {
         fontSize: 24,
         marginVertical: 10,
-        color: '#FFFFFF', // Adjust for visibility
+        color: '#FFFFFF',
     },
     library: {
         paddingHorizontal: 10,
@@ -193,15 +201,14 @@ const styles = StyleSheet.create({
     songCard: {
         backgroundColor: '#B7005E',
         borderRadius: 10,
-        padding: 20,
         marginRight: 10,
-        width: 100, // Set a fixed width for the song cards
-        height: 100, // Set a fixed height to make them square
-        justifyContent: 'center', // Center text vertically
-        alignItems: 'center', // Center text horizontally
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    songText: {
-        color: '#FFFFFF', // Adjust for visibility
+    songImage: {
+        width: 100, // Adjust the size of the image as needed
+        height: 100,
+        borderRadius: 10,
     },
 });
 

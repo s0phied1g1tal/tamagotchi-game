@@ -1,107 +1,135 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, Button } from 'react-native';
+import { View, StyleSheet, Image, Text, PanResponder } from 'react-native';
 
-const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
+const FeedingScreen = () => {
+  const [foodBlocks, setFoodBlocks] = useState([]);
+  const [score, setScore] = useState(0);
+  const [showScore, setShowScore] = useState(false);
+  
+  const tamagotchiGIF = require('../assets/kirby.gif'); // Update your path if needed
 
-const SnakeGame = ({ navigation }) => {
-    const [snakePosition, setSnakePosition] = useState({ x: screenWidth / 2, y: screenHeight / 2 });
-    const [snakeDirection, setSnakeDirection] = useState({ dx: 0, dy: 0 });
-    const [foodPosition, setFoodPosition] = useState({ x: Math.random() * (screenWidth - 50), y: Math.random() * (screenHeight - 50) });
-    const [score, setScore] = useState(0);
-    const snakeSize = 50; // Size of the snake
+  // Function to spawn food blocks at random positions
+  const spawnFoodBlocks = () => {
+    const newFoodBlocks = [];
+    for (let i = 0; i < 3; i++) {
+      const randomX = Math.floor(Math.random() * 300); // Adjust based on screen width
+      const randomY = Math.floor(Math.random() * 300) + 400; // Lower on the screen, adjust as needed
+      const randomColor = getRandomColor();
+      const randomValue = randomColor === 'red' ? 10 : 2; // Different values based on color
+      newFoodBlocks.push({ id: i + 1, x: randomX, y: randomY, color: randomColor, value: randomValue });
+    }
+    setFoodBlocks(newFoodBlocks);
+  };
 
-    // Move the snake every 100ms
-    useEffect(() => {
-        const moveInterval = setInterval(() => {
-            setSnakePosition(prev => {
-                const newX = prev.x + snakeDirection.dx * snakeSize;
-                const newY = prev.y + snakeDirection.dy * snakeSize;
+  // Function to get a random color for the food blocks
+  const getRandomColor = () => {
+    const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
 
-                // Boundary checks
-                const boundedX = Math.max(0, Math.min(newX, screenWidth - snakeSize));
-                const boundedY = Math.max(0, Math.min(newY, screenHeight - snakeSize));
+  // Function to handle releasing a food block
+  const handleRelease = (index) => {
+    const foodBlock = foodBlocks[index];
 
-                // Check for food collision
-                if (
-                    boundedX < foodPosition.x + snakeSize &&
-                    boundedX + snakeSize > foodPosition.x &&
-                    boundedY < foodPosition.y + snakeSize &&
-                    boundedY + snakeSize > foodPosition.y
-                ) {
-                    setScore(prevScore => prevScore + 1);
-                    setFoodPosition({
-                        x: Math.random() * (screenWidth - 50),
-                        y: Math.random() * (screenHeight - 50)
-                    });
-                }
+    // Check collision with the Tamagotchi GIF
+    const gifY = 200; // Adjust this based on your GIF's position
+    const gifHeight = 100; // Adjust based on your GIF's height
+    const gifX = 0; // Adjust based on your GIF's X position
+    const gifWidth = 300; // Adjust based on your GIF's width
 
-                return { x: boundedX, y: boundedY };
-            });
-        }, 100); // Adjust speed of movement here
+    if (
+      foodBlock.y + 50 > gifY && // Assuming block height is 50
+      foodBlock.y < gifY + gifHeight &&
+      foodBlock.x + 50 > gifX &&
+      foodBlock.x < gifX + gifWidth
+    ) {
+      setScore(prev => prev + foodBlock.value);
+      setShowScore(true);
 
-        return () => clearInterval(moveInterval); // Cleanup on unmount
-    }, [snakeDirection]);
+      // Remove the food block that was eaten
+      const newFoodBlocks = [...foodBlocks];
+      newFoodBlocks.splice(index, 1);
+      setFoodBlocks(newFoodBlocks);
 
-    const moveUp = () => setSnakeDirection({ dx: 0, dy: -1 });
-    const moveDown = () => setSnakeDirection({ dx: 0, dy: 1 });
-    const moveLeft = () => setSnakeDirection({ dx: -1, dy: 0 });
-    const moveRight = () => setSnakeDirection({ dx: 1, dy: 0 });
+      // Hide score message after 5 seconds
+      setTimeout(() => {
+        setShowScore(false);
+      }, 5000);
+      
+      // Respawn new food blocks
+      spawnFoodBlocks();
+    }
+  };
+// Example in FeedingScreen
+const handleFoodCaught = (amount) => {
+    setHunger(prev => Math.min(prev + amount, 100)); // Increase hunger when food is caught
+};
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.score}>Score: {score}</Text>
-            <View style={{
-                position: 'absolute',
-                left: snakePosition.x,
-                top: snakePosition.y,
-                width: snakeSize,
-                height: snakeSize,
-                backgroundColor: 'pink' // Change to your asset later
-            }} />
-            <View style={{
-                position: 'absolute',
-                left: foodPosition.x,
-                top: foodPosition.y,
-                width: snakeSize,
-                height: snakeSize,
-                backgroundColor: 'white' // Food color
-            }} />
-            <View style={styles.buttonContainer}>
-                <Button title="↑" onPress={moveUp} />
-                <View style={styles.horizontalButtonContainer}>
-                    <Button title="←" onPress={moveLeft} />
-                    <Button title="→" onPress={moveRight} />
-                </View>
-                <Button title="↓" onPress={moveDown} />
-            </View>
-            <Button title="Go Back" onPress={() => navigation.navigate('MainScreen')} />
-        </View>
-    );
+  // Create pan handlers for the food blocks
+  const panHandlers = (index) => {
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {}, // No action needed on grant
+      onPanResponderMove: (evt, gestureState) => {
+        const newFoodBlocks = [...foodBlocks];
+        const foodBlock = newFoodBlocks[index];
+
+        // Update position based on gesture
+        foodBlock.x = gestureState.moveX - 25; // Center the block on the touch
+        foodBlock.y = gestureState.moveY - 25; // Center the block on the touch
+        setFoodBlocks(newFoodBlocks);
+      },
+      onPanResponderRelease: () => handleRelease(index),
+    });
+  };
+
+  // Spawn initial food blocks on component mount
+  useEffect(() => {
+    spawnFoodBlocks();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <Image source={tamagotchiGIF} style={styles.gif} />
+
+      {foodBlocks.map((block, index) => (
+        <View
+          key={block.id}
+          style={[styles.foodBlock, { left: block.x, top: block.y, backgroundColor: block.color }]}
+          {...panHandlers(index).panHandlers}
+        />
+      ))}
+
+      {showScore && <Text style={styles.score}>+{score}</Text>}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#FF1879',
-    },
-    score: {
-        fontSize: 24,
-        position: 'absolute',
-        top: 40,
-        left: 20,
-    },
-    buttonContainer: {
-        position: 'absolute',
-        bottom: 50,
-    },
-    horizontalButtonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: 120,
-    }
+  container: {
+    flex: 1,
+    backgroundColor: '#FF1879',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gif: {
+    position: 'absolute',
+    top: 100, // Adjust to your layout
+    width: 400,
+    height: 400,
+  },
+  foodBlock: {
+    position: 'absolute',
+    width: 50,
+    height: 50,
+  },
+  score: {
+    position: 'absolute',
+    top: 50,
+    fontSize: 24,
+    color: 'white',
+  },
 });
 
-export default SnakeGame;
+export default FeedingScreen;
