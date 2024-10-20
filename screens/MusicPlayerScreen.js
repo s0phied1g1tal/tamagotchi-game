@@ -13,10 +13,10 @@ const MusicPlayerScreen = ({ route }) => {
 
     const songs = [
         { title: 'ETA', path: require('../assets/audio/ETA.mp3'), cover: require('../assets/images/cover1.jpg') },
-        { title: 'Song 2', path: require('../assets/audio/BuriBuri.mp3'), cover: require('../assets/images/cover2.jpg') },
-        { title: 'Song 3', path: require('../assets/audio/Clint Eastwood.mp3'), cover: require('../assets/images/cover3.jpg') },
-        { title: 'Song 4', path: require('../assets/audio/Espresso.mp3'), cover: require('../assets/images/cover4.jpg') },
-        { title: 'Song 5', path: require('../assets/audio/TTYL.mp3'), cover: require('../assets/images/cover5.jpg') },
+        { title: 'Buri Buri', path: require('../assets/audio/BuriBuri.mp3'), cover: require('../assets/images/cover2.jpg') },
+        { title: 'Clint Eastwood', path: require('../assets/audio/Clint Eastwood.mp3'), cover: require('../assets/images/cover3.jpg') },
+        { title: 'Espresso', path: require('../assets/audio/Espresso.mp3'), cover: require('../assets/images/cover4.jpg') },
+        { title: 'TTYL', path: require('../assets/audio/TTYL.mp3'), cover: require('../assets/images/cover5.jpg') },
     ];
 
     const [currentSongIndex, setCurrentSongIndex] = useState(0);
@@ -24,6 +24,7 @@ const MusicPlayerScreen = ({ route }) => {
     const playSound = async (song) => {
         if (sound) {
             await sound.stopAsync();
+            await sound.unloadAsync();  // Make sure to unload the previous sound
             setSound(null);
             setIsPlaying(false);
             setProgress(0);
@@ -170,6 +171,7 @@ const styles = StyleSheet.create({
     slider: {
         width: '80%',
         height: 40,
+        
     },
     progressContainer: {
         flexDirection: 'row',
@@ -186,7 +188,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     controlImage: {
-        width: 40, // Adjust size as needed
+        width: 40,
         height: 40,
         marginHorizontal: 10,
     },
@@ -204,10 +206,12 @@ const styles = StyleSheet.create({
         marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
+        width: 220,  // Set the width to 220
+        height: 220, // Set the height to 220
     },
     songImage: {
-        width: 100, // Adjust the size of the image as needed
-        height: 100,
+        width: 220,  // Set the width of the image to fill the card
+        height: 220, // Set the height of the image to fill the card
         borderRadius: 10,
     },
 });

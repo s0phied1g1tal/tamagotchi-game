@@ -20,7 +20,7 @@ const MainScreen = ({ navigation }) => {
     };
 
     const navigateToFeedingScreen = () => {
-        navigation.navigate('FeedingScreen', { hunger, setHunger });
+        navigation.navigate('FeedingScreen', { setHunger }); // Pass setHunger
     };
 
     return (
@@ -100,31 +100,26 @@ const styles = StyleSheet.create({
     },
     progressFill: {
         height: '100%',
-        backgroundColor: '#D13F5C', // Same color for consistency
+        backgroundColor: '#D13D4A', // Red color for the hunger bar
     },
     progressText: {
-        color: '#FFFFFF',
         textAlign: 'center',
         marginBottom: 5,
-        fontWeight: 'bold',
+        color: 'white',
     },
     buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '80%',
-        marginBottom: 20, // Space below the buttons
-    },
-    button: {
-        backgroundColor: '#D13F5C', // Same color as the progress fill
-        borderRadius: 10,
-        padding: 15,
-        width: '48%', // Adjust to fit both buttons
+        flexDirection: 'column',
         alignItems: 'center',
     },
+    button: {
+        backgroundColor: '#FF80AB', // Adjust button color
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 10,
+    },
     buttonText: {
-        color: '#FFFFFF',
+        color: 'white',
         fontSize: 16,
-        fontWeight: 'bold',
     },
 });
 
