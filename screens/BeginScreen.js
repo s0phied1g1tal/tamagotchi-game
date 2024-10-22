@@ -2,21 +2,19 @@ import React, { useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Animated } from 'react-native';
 
 const BeginScreen = ({ navigation }) => {
-  const logoScale = useRef(new Animated.Value(1)).current; // Create a new Animated value for scaling
-
+  const logoScale = useRef(new Animated.Value(1)).current; 
   useEffect(() => {
-    // Start the animation loop
     Animated.loop(
       Animated.sequence([
         Animated.timing(logoScale, {
-          toValue: 1.1, // Scale to 110%
-          duration: 1000, // Duration of the scaling
-          useNativeDriver: true, // Use native driver for better performance
+          toValue: 1.1, 
+          duration: 1000, 
+          useNativeDriver: true, 
         }),
         Animated.timing(logoScale, {
-          toValue: 1, // Scale back to original
-          duration: 1000, // Duration of the scaling
-          useNativeDriver: true, // Use native driver for better performance
+          toValue: 1, 
+          duration: 1000, 
+          useNativeDriver: true, 
         }),
       ])
     ).start();
@@ -24,13 +22,11 @@ const BeginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Logo Image with Animation */}
       <Animated.Image
         source={require('../assets/logo.png')}
-        style={[styles.logo, { transform: [{ scale: logoScale }] }]} // Apply the scaling transform
+        style={[styles.logo, { transform: [{ scale: logoScale }] }]} 
       />
       
-      {/* Start Button */}
       <TouchableOpacity
         style={styles.startButton}
         onPress={() => navigation.navigate('LoginScreen')}
@@ -49,24 +45,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF1879',
   },
   logo: {
-    width: 300,  // Adjust this to the size of your logo
+    width: 300,  
     height: 150,
-    resizeMode: 'contain',  // Makes sure the aspect ratio is maintained
-    marginBottom: 50,  // Adds some space between logo and button
+    resizeMode: 'contain',  
+    marginBottom: 50,  
   },
   startButton: {
-    backgroundColor: '#B7005E',  // Darker pink for the button
+    backgroundColor: '#6D003F',  
     paddingVertical: 15,
     paddingHorizontal: 50,
-    borderRadius: 25,  // Makes the button rounded
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 5,  // For Android shadow
+    borderRadius: 25,  
+
   },
   buttonText: {
-    fontFamily: 'Cherry Bomb One', // Change this to the actual font family name if necessary
+    fontFamily: 'Cherry Bomb One', 
     color: '#FF76AA',
     fontSize: 20,
   },

@@ -7,7 +7,7 @@ const CustomText = ({ style, ...props }) => {
 
 const styles = StyleSheet.create({
   customFont: {
-    fontFamily: 'CherryBomb', // Use the font name as defined in your font file
+    fontFamily: 'CherryBomb', file
   },
 });
 

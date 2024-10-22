@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, Image, Text, PanResponder } from 'react-native';
-import { Video } from 'expo-av';
+import { Video, Audio } from 'expo-av';
 
 const FeedingScreen = ({ route }) => {
     const { setHunger } = route.params;
@@ -10,6 +10,7 @@ const FeedingScreen = ({ route }) => {
     const [draggedFoodBlock, setDraggedFoodBlock] = useState(null);
     const [currentVideo, setCurrentVideo] = useState('idle');
     const videoRef = useRef(null);
+    const audioRef = useRef(new Audio.Sound()); 
 
     const foodImages = {
         apple: require('../assets/images/apple.png'),
@@ -20,10 +21,29 @@ const FeedingScreen = ({ route }) => {
         pizza: require('../assets/images/pizza.png'),
     };
 
+    useEffect(() => {
+        const loadAudio = async () => {
+            try {
+                await audioRef.current.loadAsync(require('../assets/audio/kirby_feeding_music.mp3')); // Load the audio file
+                await audioRef.current.setIsLoopingAsync(true); 
+                await audioRef.current.playAsync(); 
+            } catch (error) {
+                console.error('Error loading audio:', error);
+            }
+        };
+
+        loadAudio();
+
+       
+        return () => {
+            audioRef.current.unloadAsync();
+        };
+    }, []);
+
     const handleRelease = (block) => {
-        const gifY = 250; // Adjust based on your layout
+        const gifY = 250; 
         const gifHeight = 100;
-        const gifX = 100; // Adjust based on your layout
+        const gifX = 100; 
         const gifWidth = 300;
 
         // Check if food is caught
@@ -47,7 +67,7 @@ const FeedingScreen = ({ route }) => {
             setTimeout(() => {
                 setShowScore(false);
                 setCurrentVideo('idle'); // Return to idle video
-            }, 2000); // Adjust time based on video length
+            }, 2000); 
         }
     };
 
@@ -63,8 +83,8 @@ const FeedingScreen = ({ route }) => {
                 const foodBlock = newFoodBlocks[index];
 
                 // Update the food block's position
-                foodBlock.x = gestureState.moveX - 30; // Center the image
-                foodBlock.y = gestureState.moveY - 30; // Center the image
+                foodBlock.x = gestureState.moveX - 30; 
+                foodBlock.y = gestureState.moveY - 30; 
                 setFoodBlocks(newFoodBlocks);
             },
             onPanResponderRelease: () => {
@@ -84,7 +104,7 @@ const FeedingScreen = ({ route }) => {
                 const foodOptions = Object.keys(foodImages);
                 const randomFood = foodOptions[Math.floor(Math.random() * foodOptions.length)];
 
-                // Create a new food block
+                // Create a new food item
                 const newFoodBlock = {
                     id: Date.now(),
                     x: 0,
@@ -141,7 +161,7 @@ const FeedingScreen = ({ route }) => {
                 isMuted={false}
                 resizeMode="contain"
                 shouldPlay={true}
-                isLooping={currentVideo === 'idle'} // Loop idle video
+                isLooping={currentVideo === 'idle'} 
                 style={styles.video}
             />
 
@@ -168,6 +188,9 @@ const FeedingScreen = ({ route }) => {
             </View>
 
             {showScore && <Text style={styles.score}>+{score}</Text>}
+
+           
+            <Text style={styles.instructionText}>Drag the food to feed Kirby!</Text>
         </View>
     );
 };
@@ -218,9 +241,22 @@ const styles = StyleSheet.create({
         height: 400,
     },
     score: {
+        fontFamily: 'Cherry Bomb One',
         position: 'absolute',
         top: 50,
         fontSize: 24,
+        color: 'white',
+        padding: 10,
+        borderRadius: 10,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+    },
+    instructionText: {
+        fontFamily: 'Cherry Bomb One',
+        position: 'absolute',
+        bottom: 690,
+        fontSize: 20,
         color: 'white',
     },
 });

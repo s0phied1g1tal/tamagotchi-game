@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av';
+import { Audio, Video } from 'expo-av'; // Import Video here
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
@@ -20,6 +20,7 @@ const MusicPlayerScreen = ({ route }) => {
     ];
 
     const [currentSongIndex, setCurrentSongIndex] = useState(0);
+    const [videoRef, setVideoRef] = useState(null);
 
     const playSound = async (song) => {
         if (sound) {
@@ -45,6 +46,11 @@ const MusicPlayerScreen = ({ route }) => {
             sound.setOnPlaybackStatusUpdate(updateStatus);
             setIsPlaying(true);
             setFun(prev => Math.min(prev + 5, 100));
+
+           
+            if (videoRef) {
+                await videoRef.playAsync();
+            }
         } catch (error) {
             console.error("Error playing sound:", error);
         }
@@ -64,6 +70,11 @@ const MusicPlayerScreen = ({ route }) => {
     const pauseSound = async () => {
         await sound.pauseAsync();
         setIsPlaying(false);
+
+        // Stop the video when paused
+        if (videoRef) {
+            await videoRef.pauseAsync();
+        }
     };
 
     const nextSong = () => {
@@ -76,6 +87,15 @@ const MusicPlayerScreen = ({ route }) => {
         const previousIndex = (currentSongIndex - 1 + songs.length) % songs.length;
         setCurrentSongIndex(previousIndex);
         playSound(songs[previousIndex]);
+    };
+
+    const formatTime = (milliseconds) => {
+        const totalSeconds = Math.floor(milliseconds / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return minutes > 0 
+            ? `${minutes}m ${seconds < 10 ? '0' : ''}${seconds}s` 
+            : `${seconds}s`;
     };
 
     useEffect(() => {
@@ -100,10 +120,13 @@ const MusicPlayerScreen = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            <Image
-                source={require('../assets/kirby.gif')}
-                style={styles.gif}
+            <Video
+                ref={ref => setVideoRef(ref)} 
+                source={require('../assets/videos/kirby_music.mp4')} 
+                style={styles.video} 
                 resizeMode="contain"
+                shouldPlay={isPlaying} 
+                isLooping
             />
 
             <Text style={styles.title}>Now Playing: {currentSong ? currentSong.title : 'Select a song'}</Text>
@@ -123,8 +146,8 @@ const MusicPlayerScreen = ({ route }) => {
             />
 
             <View style={styles.progressContainer}>
-                <Text style={styles.progressText}>{`${Math.floor(progress / 1000)}s`}</Text>
-                <Text style={styles.progressText}>{`${Math.floor(duration / 1000)}s`}</Text>
+                <Text style={styles.progressText}>{formatTime(progress)}</Text>
+                <Text style={styles.progressText}>{formatTime(duration)}</Text>
             </View>
 
             <View style={styles.controls}>
@@ -158,10 +181,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#FF1879',
         paddingVertical: 20,
     },
-    gif: {
+    video: {
         width: '100%',
-        height: 200,
-        marginBottom: 10,
+        height: 400, 
+        marginBottom: -70,
     },
     title: {
         fontSize: 24,
@@ -171,7 +194,6 @@ const styles = StyleSheet.create({
     slider: {
         width: '80%',
         height: 40,
-        
     },
     progressContainer: {
         flexDirection: 'row',
@@ -206,12 +228,12 @@ const styles = StyleSheet.create({
         marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        width: 220,  // Set the width to 220
-        height: 220, // Set the height to 220
+        width: 220,
+        height: 220,
     },
     songImage: {
-        width: 220,  // Set the width of the image to fill the card
-        height: 220, // Set the height of the image to fill the card
+        width: 220,
+        height: 220,
         borderRadius: 10,
     },
 });

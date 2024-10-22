@@ -8,15 +8,15 @@ const LoginScreen = ({ navigation }) => {
   const handleSubmit = async () => {
     try {
       const url = isLogin 
-          ? 'http://192.168.129.6:5000/tamagotchi/login' // Login endpoint
-          : 'http://192.168.129.6:5000/tamagotchi/create'; // Sign-in endpoint
+          ? 'http://10.150.192.104:5000/tamagotchi/login' 
+          : 'http://10.150.192.104:5000/tamagotchi/create';
 
       const response = await fetch(url, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ userId }), // Only send userId for both login and sign-in
+          body: JSON.stringify({ userId }), 
       });
 
       if (!response.ok) {
@@ -26,16 +26,17 @@ const LoginScreen = ({ navigation }) => {
       const data = await response.json();
       console.log(data);
       Alert.alert('Success', isLogin ? 'Logged in successfully!' : 'Account created successfully!');
-      navigation.navigate('MainScreen'); // Navigate to the main screen
+      navigation.navigate('MainScreen'); 
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', error.message); // Show error alert
+      Alert.alert('Error', error.message); 
     }
   };
 
   return (
+    
     <View style={styles.container}>
-      {/* Logo Image */}
+
       <Image source={require('../assets/logo.png')} style={styles.logo} />
 
       <TextInput
@@ -59,42 +60,46 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FF1879', // Background color to match your theme
+    backgroundColor: '#FF1879', 
     padding: 20,
   },
   logo: {
-    width: 200, // Adjust the size of your logo
+    width: 200, 
     height: 100,
     resizeMode: 'contain',
-    marginBottom: 30, // Space between logo and input
+    marginBottom: 30,
   },
   input: {
+    color: '#6D003F',
+    fontFamily: 'Cherry Bomb One',
     height: 50,
-    width: '100%', // Full width
-    borderColor: '#D13F5C', // Border color
+    width: '100%', 
+    borderColor: '#6D003F', 
     borderWidth: 2,
-    borderRadius: 25, // Rounded corners
-    paddingHorizontal: 20, // Padding inside the input
-    marginBottom: 15, // Space between input and button
-    backgroundColor: '#fff', // Background color for input
+    borderRadius: 25, 
+    paddingHorizontal: 20, 
+    marginBottom: 15, 
+    backgroundColor: '#fff', 
   },
   button: {
-    backgroundColor: '#D13F5C', // Button color
+    backgroundColor: '#6D003F', 
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 25,
     alignItems: 'center',
-    marginBottom: 15, // Space between buttons
+    marginBottom: 15, 
   },
   buttonText: {
+    fontFamily: 'Cherry Bomb One',
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
   },
   toggleText: {
+    fontFamily: 'Cherry Bomb One',
     color: '#FFFFFF',
     fontSize: 16,
-    textDecorationLine: 'underline', // Underline for the toggle text
+    textDecorationLine: 'underline', 
   },
 });
 

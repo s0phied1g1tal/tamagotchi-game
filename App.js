@@ -1,27 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
+import { useFonts } from 'expo-font';
 import BeginScreen from './screens/BeginScreen';
 import LoginScreen from './screens/LoginScreen';
 import MainScreen from './screens/MainScreen';
 import MusicPlayerScreen from './screens/MusicPlayerScreen';
 import FeedingScreen from './screens/FeedingScreen';
 
+
 const Stack = createNativeStackNavigator();
 
-// Override default Text component
-const CustomText = ({ style, ...props }) => {
-  return <Text {...props} style={[styles.customFont, style]} />;
-};
-
-const styles = StyleSheet.create({
-  customFont: {
-    fontFamily: 'Cherry Bomb One', // Use the font name as defined in your font file
-  },
-});
-
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    'Cherry Bomb One': require('./assets/fonts/cherrybombone-regular.ttf'), // Correct path to your font
+  });
+
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="BeginScreen" screenOptions={{ headerShown: false }}>
@@ -35,4 +39,18 @@ export default function App() {
   );
 }
 
-// Then you can use <CustomText> instead of <Text> throughout your app
+const styles = StyleSheet.create({
+  customFont: {
+    fontFamily: 'Cherry Bomb One',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FF1879', 
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: 20,
+  },
+});
