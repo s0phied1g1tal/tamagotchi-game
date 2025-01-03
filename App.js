@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text, StyleSheet, View } from 'react-native';
@@ -8,7 +8,7 @@ import LoginScreen from './screens/LoginScreen';
 import MainScreen from './screens/MainScreen';
 import MusicPlayerScreen from './screens/MusicPlayerScreen';
 import FeedingScreen from './screens/FeedingScreen';
-
+import ProfileScreen from './screens/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,7 +16,6 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     'Cherry Bomb One': require('./assets/fonts/cherrybombone-regular.ttf'), // Correct path to your font
   });
-
 
   if (!fontsLoaded) {
     return (
@@ -29,11 +28,14 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="BeginScreen" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MainScreen" component={MainScreen} />
         <Stack.Screen name="BeginScreen" component={BeginScreen} />
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
-        <Stack.Screen name="MainScreen" component={MainScreen} />
+      
+        {/* Pass song data to MusicPlayerScreen */}
         <Stack.Screen name="MusicPlayerScreen" component={MusicPlayerScreen} />
         <Stack.Screen name="FeedingScreen" component={FeedingScreen} />
+        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

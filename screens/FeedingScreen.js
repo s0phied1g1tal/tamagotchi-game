@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, Image, Text, PanResponder } from 'react-native';
+import { View, StyleSheet, Image, Text, PanResponder, TouchableOpacity } from 'react-native';
 import { Video, Audio } from 'expo-av';
 
-const FeedingScreen = ({ route }) => {
+const FeedingScreen = ({ route, navigation }) => {
     const { setHunger } = route.params;
     const [foodBlocks, setFoodBlocks] = useState([]);
     const [showScore, setShowScore] = useState(false);
@@ -10,7 +10,7 @@ const FeedingScreen = ({ route }) => {
     const [draggedFoodBlock, setDraggedFoodBlock] = useState(null);
     const [currentVideo, setCurrentVideo] = useState('idle');
     const videoRef = useRef(null);
-    const audioRef = useRef(new Audio.Sound()); 
+    const audioRef = useRef(new Audio.Sound());
 
     const foodImages = {
         apple: require('../assets/images/apple.png'),
@@ -24,9 +24,9 @@ const FeedingScreen = ({ route }) => {
     useEffect(() => {
         const loadAudio = async () => {
             try {
-                await audioRef.current.loadAsync(require('../assets/audio/kirby_feeding_music.mp3')); // Load the audio file
-                await audioRef.current.setIsLoopingAsync(true); 
-                await audioRef.current.playAsync(); 
+                await audioRef.current.loadAsync(require('../assets/audio/kirby_feeding_music.mp3'));
+                await audioRef.current.setIsLoopingAsync(true);
+                await audioRef.current.playAsync();
             } catch (error) {
                 console.error('Error loading audio:', error);
             }
@@ -34,19 +34,17 @@ const FeedingScreen = ({ route }) => {
 
         loadAudio();
 
-       
         return () => {
             audioRef.current.unloadAsync();
         };
     }, []);
 
     const handleRelease = (block) => {
-        const gifY = 250; 
+        const gifY = 250;
         const gifHeight = 100;
-        const gifX = 100; 
+        const gifX = 100;
         const gifWidth = 300;
 
-        // Check if food is caught
         if (
             block.y + 60 > gifY &&
             block.y < gifY + gifHeight &&
@@ -57,17 +55,14 @@ const FeedingScreen = ({ route }) => {
             setScore((prev) => prev + block.value);
             setShowScore(true);
 
-            // Play eating video when food is caught
             setCurrentVideo('eating');
 
-            // Remove the caught food block
             setFoodBlocks((prev) => prev.filter((b) => b.id !== block.id));
 
-            // Reset back to idle after eating video plays
             setTimeout(() => {
                 setShowScore(false);
-                setCurrentVideo('idle'); // Return to idle video
-            }, 2000); 
+                setCurrentVideo('idle');
+            }, 2000);
         }
     };
 
@@ -76,15 +71,14 @@ const FeedingScreen = ({ route }) => {
             onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: () => true,
             onPanResponderGrant: () => {
-                setCurrentVideo('mouth_open'); // Play mouth open video when dragging starts
+                setCurrentVideo('mouth_open');
             },
             onPanResponderMove: (evt, gestureState) => {
                 const newFoodBlocks = [...foodBlocks];
                 const foodBlock = newFoodBlocks[index];
 
-                // Update the food block's position
-                foodBlock.x = gestureState.moveX - 30; 
-                foodBlock.y = gestureState.moveY - 30; 
+                foodBlock.x = gestureState.moveX - 30;
+                foodBlock.y = gestureState.moveY - 30;
                 setFoodBlocks(newFoodBlocks);
             },
             onPanResponderRelease: () => {
@@ -98,13 +92,11 @@ const FeedingScreen = ({ route }) => {
             onStartShouldSetPanResponder: () => true,
             onMoveShouldSetPanResponder: () => true,
             onPanResponderGrant: () => {
-                // Play mouth open video when food pile is touched
                 setCurrentVideo('mouth_open');
 
                 const foodOptions = Object.keys(foodImages);
                 const randomFood = foodOptions[Math.floor(Math.random() * foodOptions.length)];
 
-                // Create a new food item
                 const newFoodBlock = {
                     id: Date.now(),
                     x: 0,
@@ -126,10 +118,9 @@ const FeedingScreen = ({ route }) => {
             },
             onPanResponderRelease: () => {
                 if (draggedFoodBlock) {
-                    // Add the dragged food block to the array
                     setFoodBlocks((prev) => [...prev, draggedFoodBlock]);
                     handleRelease(draggedFoodBlock);
-                    setDraggedFoodBlock(null); // Clear the dragged food block
+                    setDraggedFoodBlock(null);
                 }
             },
         });
@@ -139,15 +130,14 @@ const FeedingScreen = ({ route }) => {
         const playVideo = async () => {
             if (videoRef.current) {
                 try {
-                    await videoRef.current.setPositionAsync(0); // Reset video to start
-                    await videoRef.current.playAsync(); // Play the video
+                    await videoRef.current.setPositionAsync(0);
+                    await videoRef.current.playAsync();
                 } catch (error) {
                     console.error('Error playing video:', error);
                 }
             }
         };
 
-        // Play the current video whenever it changes
         playVideo();
     }, [currentVideo]);
 
@@ -161,7 +151,7 @@ const FeedingScreen = ({ route }) => {
                 isMuted={false}
                 resizeMode="contain"
                 shouldPlay={true}
-                isLooping={currentVideo === 'idle'} 
+                isLooping={currentVideo === 'idle'}
                 style={styles.video}
             />
 
@@ -189,13 +179,15 @@ const FeedingScreen = ({ route }) => {
 
             {showScore && <Text style={styles.score}>+{score}</Text>}
 
-           
             <Text style={styles.instructionText}>Drag the food to feed Kirby!</Text>
+
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Text style={styles.backButtonText}>Back</Text>
+            </TouchableOpacity>
         </View>
     );
 };
 
-// Function to get the video source based on currentVideo state
 const getVideoSource = (videoType) => {
     switch (videoType) {
         case 'mouth_open':
@@ -256,6 +248,21 @@ const styles = StyleSheet.create({
         fontFamily: 'Cherry Bomb One',
         position: 'absolute',
         bottom: 690,
+        fontSize: 20,
+        color: 'white',
+    },
+    backButton: {
+        backgroundColor: '#6D003F',
+        borderRadius: 25,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 10,
+    },
+    backButtonText: {
+        fontFamily: 'Cherry Bomb One',
         fontSize: 20,
         color: 'white',
     },

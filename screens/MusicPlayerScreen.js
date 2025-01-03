@@ -3,13 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Slider from '@react-native-community/slider';
 
-const MusicPlayerScreen = ({ route }) => {
+const MusicPlayerScreen = ({ navigation, route }) => {
     const [sound, setSound] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
     const [currentSong, setCurrentSong] = useState(null);
-    const { setFun } = route.params;
+    const { setFun } = route.params; // Get setFun to update the fun bar when music is played
 
     const songs = [
         { title: 'ETA', path: require('../assets/audio/ETA.mp3'), cover: require('../assets/images/cover1.jpg') },
@@ -37,6 +37,7 @@ const MusicPlayerScreen = ({ route }) => {
                 {
                     isLooping: false,
                     shouldPlay: true,
+                    positionMillis: progress, // Resume from the last position
                 }
             );
 
@@ -45,9 +46,8 @@ const MusicPlayerScreen = ({ route }) => {
             setDuration(status.durationMillis);
             sound.setOnPlaybackStatusUpdate(updateStatus);
             setIsPlaying(true);
-            setFun(prev => Math.min(prev + 5, 100));
+            setFun(prev => Math.min(prev + 5, 100));  // Update the fun bar when music is played
 
-           
             if (videoRef) {
                 await videoRef.playAsync();
             }
@@ -120,6 +120,14 @@ const MusicPlayerScreen = ({ route }) => {
 
     return (
         <View style={styles.container}>
+            {/* Back Button */}
+            <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.navigate('MainScreen')}
+            >
+                <Text style={styles.backButtonText}>← Back</Text>
+            </TouchableOpacity>
+
             <Video
                 ref={ref => setVideoRef(ref)} 
                 source={require('../assets/videos/kirby_music.mp4')} 
@@ -235,6 +243,22 @@ const styles = StyleSheet.create({
         width: 220,
         height: 220,
         borderRadius: 10,
+    },
+    // Back button style
+    backButton: {
+        backgroundColor: '#6D003F',
+        borderRadius: 25,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 10,
+    },
+    backButtonText: {
+        color: '#fff',
+        fontFamily: 'Cherry Bomb One',
+        fontSize: 18,
     },
 });
 

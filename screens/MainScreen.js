@@ -1,38 +1,49 @@
+// MainScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image as RNImage } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MainScreen = ({ navigation }) => {
     const [hunger, setHunger] = useState(100);
     const [fun, setFun] = useState(100);
+    const [username, setUsername] = useState(''); // State to store username
 
+    // Decrease hunger and fun over time
     useEffect(() => {
         const interval = setInterval(() => {
             setHunger(prev => Math.max(prev - 5, 0));
-            setFun(prev => Math.max(prev -2, 0));
+            setFun(prev => Math.max(prev - 2, 0));
         }, 10000);
 
         return () => clearInterval(interval);
     }, []);
 
+    // Get hunger and fun progress bar colors
     const getHungerBarColor = () => {
         if (hunger < 20) return 'red';
         if (hunger < 50) return 'orange';
-        return '#B7005E'; 
+        return '#B7005E';
     };
 
     const getFunBarColor = () => {
         if (fun < 20) return 'red';
         if (fun < 50) return 'orange';
-        return '#B7005E'; 
+        return '#B7005E';
     };
 
+    // Navigation functions
     const navigateToMusicPlayerScreen = () => {
         navigation.navigate('MusicPlayerScreen', { setFun });
     };
 
     const navigateToFeedingScreen = () => {
         navigation.navigate('FeedingScreen', { hunger, setHunger });
+    };
+
+    const navigateToProfileScreen = () => {
+        navigation.navigate('ProfileScreen');
     };
 
     return (
@@ -42,9 +53,21 @@ const MainScreen = ({ navigation }) => {
             end={{ x: 1, y: 1 }}
             style={styles.container}
         >
+            {/* Profile Button as Circle with Image */}
+            <TouchableOpacity 
+                style={styles.profileButton} 
+                onPress={navigateToProfileScreen}
+            >
+                <RNImage source={require('../assets/images/profile.png')} style={styles.profileImage} />
+            </TouchableOpacity>
+
+            {/* Replace with your app logo */}
             <Image source={require('../assets/logo.png')} style={styles.logo} />
+
+            {/* Animated GIF */}
             <Image source={require('../assets/kirby.gif')} style={styles.gif} />
 
+            {/* Progress bars */}
             <View style={styles.progressContainer}>
                 <View style={styles.progressBarContainer}>
                     <Text style={styles.progressText}>Hunger</Text>
@@ -63,6 +86,7 @@ const MainScreen = ({ navigation }) => {
                 </View>
             </View>
 
+            {/* Buttons */}
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.button} onPress={navigateToMusicPlayerScreen}>
                     <Text style={styles.buttonText}>Music Player</Text>
@@ -75,6 +99,7 @@ const MainScreen = ({ navigation }) => {
     );
 };
 
+// Styles
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -82,11 +107,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingTop: 20,
     },
+    profileButton: {
+        position: 'absolute',
+        top: 60, // Adjusted to move the profile button down a bit
+        right: 20,
+        borderRadius: 50,  // Makes the button a circle
+        width: 40,  // Set the width of the circle
+        height: 40,  // Set the height of the circle
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#B7005E',
+    },
+    profileImage: {
+        width: 20,  // Set the size of the image inside the circle
+        height: 20,  // Set the size of the image inside the circle
+        borderRadius: 20,  // Make the image circular inside the button
+    },
+
     logo: {
         width: 200,
         height: 150,
         resizeMode: 'contain',
         marginBottom: 50,
+        marginTop: 50,
     },
     gif: {
         width: 400,
