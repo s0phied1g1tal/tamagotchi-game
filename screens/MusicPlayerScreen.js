@@ -170,14 +170,16 @@ const MusicPlayerScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.libraryTitle}>Library</Text>
-            <ScrollView horizontal contentContainerStyle={styles.library}>
-                {songs.map((song, index) => (
-                    <TouchableOpacity key={index} style={styles.songCard} onPress={() => playSound(song)}>
-                        <Image source={song.cover} style={styles.songImage} />
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
+            <View style={styles.libraryContainer}>
+                <Text style={styles.libraryTitle}>Library</Text>
+                <ScrollView horizontal contentContainerStyle={styles.library}>
+                    {songs.map((song, index) => (
+                        <TouchableOpacity key={index} style={styles.songCard} onPress={() => playSound(song)}>
+                            <Image source={song.cover} style={styles.songImage} />
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
         </View>
     );
 };
@@ -222,6 +224,12 @@ const styles = StyleSheet.create({
         height: 40,
         marginHorizontal: 10,
     },
+    libraryContainer: {
+        alignItems: 'flex-start',
+        width: '100%',
+        marginTop: 20,
+        paddingHorizontal: 10,
+    },
     libraryTitle: {
         fontSize: 24,
         marginVertical: 10,
@@ -236,12 +244,12 @@ const styles = StyleSheet.create({
         marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        width: 220,
-        height: 220,
+        width: 180,  // Adjust the width to make album images smaller
+        height: 180,  // Adjust the height to match the width
     },
     songImage: {
-        width: 220,
-        height: 220,
+        width: 180,  // Make the album images smaller
+        height: 180,  // Maintain aspect ratio
         borderRadius: 10,
     },
     // Back button style

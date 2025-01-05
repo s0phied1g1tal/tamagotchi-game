@@ -1,5 +1,4 @@
-// MainScreen.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image as RNImage } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'expo-image';
@@ -33,18 +32,18 @@ const MainScreen = ({ navigation }) => {
         return '#B7005E';
     };
 
-    // Navigation functions
-    const navigateToMusicPlayerScreen = () => {
+    // Memoized navigation functions
+    const navigateToMusicPlayerScreen = useCallback(() => {
         navigation.navigate('MusicPlayerScreen', { setFun });
-    };
+    }, [navigation]);
 
-    const navigateToFeedingScreen = () => {
+    const navigateToFeedingScreen = useCallback(() => {
         navigation.navigate('FeedingScreen', { hunger, setHunger });
-    };
+    }, [navigation, hunger]);
 
-    const navigateToProfileScreen = () => {
+    const navigateToProfileScreen = useCallback(() => {
         navigation.navigate('ProfileScreen');
-    };
+    }, [navigation]);
 
     return (
         <LinearGradient 
@@ -99,7 +98,6 @@ const MainScreen = ({ navigation }) => {
     );
 };
 
-// Styles
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -187,3 +185,4 @@ const styles = StyleSheet.create({
 });
 
 export default MainScreen;
+ 

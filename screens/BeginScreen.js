@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     width: 300,  
     height: 150,
     resizeMode: 'contain',  
-    marginBottom: 50,  
+    marginBottom: 10,  
   },
   startButton: {
     backgroundColor: '#6D003F',  
